@@ -246,6 +246,40 @@ void main() {
       expect(occ.xuSui, 27);
     });
 
+    test('农历冬月出生跨公历年，周岁按实际出生公历年计算', () {
+      // 农历 1961 年冬月廿六 → 公历 1962-01-02 出生；
+      // 下一次为农历 2026 年冬月廿六 → 公历 2027-01-03，应满 65 岁。
+      final occ = engine.nextOccurrence(
+        const BirthdaySpec(
+          type: CalendarType.lunar,
+          month: 11,
+          day: 26,
+          birthYear: 1961,
+        ),
+        d(2026, 9, 23),
+      );
+      expect(occ.date, d(2027, 1, 3));
+      expect(occ.ageInYears, 65);
+      expect(occ.xuSui, 66);
+    });
+
+    test('农历腊月出生跨公历年，周岁不许多算一岁', () {
+      // 农历 2000 年腊月二十 → 公历 2001-01-14 出生；
+      // 下一次为 2026-02-07，应满 25 岁（而非按农历年算出的 26）。
+      const spec = BirthdaySpec(
+        type: CalendarType.lunar,
+        month: 12,
+        day: 20,
+        birthYear: 2000,
+      );
+      expect(engine.birthDate(spec), d(2001, 1, 14));
+
+      final occ = engine.nextOccurrence(spec, d(2026, 1, 1));
+      expect(occ.date, d(2026, 2, 7));
+      expect(occ.ageInYears, 25);
+      expect(occ.xuSui, 26);
+    });
+
     test('不知道出生年份时年龄为空', () {
       final occ = engine.nextOccurrence(
         const BirthdaySpec(type: CalendarType.solar, month: 5, day: 5),

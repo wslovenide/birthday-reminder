@@ -57,8 +57,11 @@ class LunarCalendarEngine implements CalendarEngine {
         ? _nextSolar(spec, today)
         : _nextLunar(spec, today);
     final daysUntil = _civilDays(candidate) - _civilDays(today);
-    final ageInYears =
-        spec.birthYear == null ? null : candidate.year - spec.birthYear!;
+    // 周岁 = 生日当天的年份 − 实际出生公历日期的年份。
+    // 农历冬月/腊月出生时，出生公历年比出生农历年大 1，必须用真实出生日期，
+    // 否则会多算一岁。
+    final birth = birthDate(spec);
+    final ageInYears = birth == null ? null : candidate.year - birth.year;
     return Occurrence(
       date: candidate,
       daysUntil: daysUntil,
