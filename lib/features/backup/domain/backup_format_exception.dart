@@ -1,0 +1,9 @@
+/// 备份文件格式错误。
+class BackupFormatException implements Exception {
+  const BackupFormatException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'BackupFormatException: $message';
+}
