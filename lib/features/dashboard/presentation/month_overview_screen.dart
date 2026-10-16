@@ -53,7 +53,7 @@ class _MonthSection extends StatelessWidget {
           color: isCurrent
               ? theme.colorScheme.primaryContainer
               : theme.colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,10 +68,21 @@ class _MonthSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 if (isCurrent)
-                  Text(
-                    '本月',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
                       color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      '本月',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 const Spacer(),

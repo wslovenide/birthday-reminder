@@ -44,6 +44,7 @@ final dashboardEntriesProvider = Provider<List<DashboardEntry>>((ref) {
         (person) => DashboardEntry(
           person: person,
           occurrence: engine.nextOccurrence(person.birthday, now),
+          zodiac: zodiacLabel(person.birthday, engine),
         ),
       )
       .toList();
@@ -63,7 +64,9 @@ final filteredEntriesProvider = Provider<List<DashboardEntry>>((ref) {
     query: query,
     relationship: relationship,
   ).map((person) => person.id).toSet();
-  return entries.where((entry) => matchedIds.contains(entry.person.id)).toList();
+  return entries
+      .where((entry) => matchedIds.contains(entry.person.id))
+      .toList();
 });
 
 /// 统计概览。
@@ -97,22 +100,22 @@ final dashboardStatsProvider = Provider<DashboardStats>((ref) {
 
 /// 年龄显示方式（来自设置）。
 final ageDisplayProvider = Provider<AgeDisplay>((ref) {
-  return ref.watch(settingsProvider).value?.ageDisplay ??
-      AgeDisplay.actual;
+  return ref.watch(settingsProvider).value?.ageDisplay ?? AgeDisplay.actual;
 });
 
 /// 按公历月份分组的生日分布。
-final monthlyDistributionProvider =
-    Provider<Map<int, List<DashboardEntry>>>((ref) {
-      final entries = ref.watch(dashboardEntriesProvider);
-      final result = <int, List<DashboardEntry>>{
-        for (var month = 1; month <= 12; month++) month: <DashboardEntry>[],
-      };
-      for (final entry in entries) {
-        result[entry.occurrence.date.month]!.add(entry);
-      }
-      return result;
-    });
+final monthlyDistributionProvider = Provider<Map<int, List<DashboardEntry>>>((
+  ref,
+) {
+  final entries = ref.watch(dashboardEntriesProvider);
+  final result = <int, List<DashboardEntry>>{
+    for (var month = 1; month <= 12; month++) month: <DashboardEntry>[],
+  };
+  for (final entry in entries) {
+    result[entry.occurrence.date.month]!.add(entry);
+  }
+  return result;
+});
 
 /// 关系筛选项：预设 + 数据中出现的自定义值。
 final relationshipOptionsProvider = Provider<List<String>>((ref) {

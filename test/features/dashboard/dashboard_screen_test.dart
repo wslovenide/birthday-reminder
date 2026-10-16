@@ -60,10 +60,11 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
-        personsProvider.overrideWith(
-          (ref) => Stream.value(people ?? persons),
+        personsProvider.overrideWith((ref) => Stream.value(people ?? persons)),
+        clockProvider.overrideWith(
+          (ref) =>
+              () => now,
         ),
-        clockProvider.overrideWith((ref) => () => now),
         settingsProvider.overrideWith(
           (ref) => Stream.value(AppSettings(ageDisplay: ageDisplay)),
         ),
@@ -79,10 +80,11 @@ void main() {
     final cards = tester
         .widgetList<BirthdayCard>(find.byType(BirthdayCard))
         .toList();
-    expect(
-      cards.map((card) => card.entry.person.name).toList(),
-      ['Bob', 'Carol', 'Alice'],
-    );
+    expect(cards.map((card) => card.entry.person.name).toList(), [
+      'Bob',
+      'Carol',
+      'Alice',
+    ]);
     expect(cards.first.entry.occurrence.isToday, isTrue);
   });
 
@@ -100,6 +102,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('农历八月十五'), findsOneWidget);
+  });
+
+  testWidgets('卡片元信息显示属相', (tester) async {
+    await tester.pumpWidget(harness());
+    await tester.pumpAndSettle();
+
+    // 仅 Bob（1990 年生，属马）填了出生年份。
+    expect(find.textContaining('属'), findsOneWidget);
+    expect(find.textContaining('属马'), findsOneWidget);
   });
 
   testWidgets('按设置显示周岁年龄', (tester) async {

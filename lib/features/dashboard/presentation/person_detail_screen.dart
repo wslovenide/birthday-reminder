@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_theme.dart';
+import '../../calendar/domain/occurrence.dart';
+import '../../persons/domain/person.dart';
 import '../../persons/providers/person_controller.dart';
 import '../../persons/providers/person_providers.dart';
 import '../../reminders/providers/reminder_providers.dart';
@@ -49,42 +52,25 @@ class PersonDetailScreen extends ConsumerWidget {
           final plans = ref.watch(personReminderPlansProvider(personId));
           final age = ageLabel(occurrence, ageDisplay);
           final birthInfo = buildBirthInfo(person.birthday, engine);
+          final zodiac = zodiacLabel(person.birthday, engine);
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              32 + MediaQuery.paddingOf(context).bottom,
+            ),
             children: [
-              Center(
-                child: Column(
-                  children: [
-                    PersonAvatar(
-                      name: person.name,
-                      avatarPath: person.avatarPath,
-                      radius: 44,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      person.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    if (person.relationship.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        person.relationship,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
+              _HeroCard(person: person, occurrence: occurrence),
+              const SizedBox(height: 16),
               _Section(
                 title: '生日信息',
                 children: [
                   _InfoRow(label: '出生年份', value: birthInfo.year),
                   _InfoRow(label: '农历', value: birthInfo.lunar),
                   _InfoRow(label: '公历', value: birthInfo.solar),
+                  if (zodiac != null) _InfoRow(label: '属相', value: zodiac),
                   if (age != null) _InfoRow(label: '年龄', value: age),
                 ],
               ),
@@ -92,7 +78,10 @@ class PersonDetailScreen extends ConsumerWidget {
               _Section(
                 title: '下一次生日',
                 children: [
-                  _InfoRow(label: '倒计时', value: countdownLabel(occurrence.daysUntil)),
+                  _InfoRow(
+                    label: '倒计时',
+                    value: countdownLabel(occurrence.daysUntil),
+                  ),
                   _InfoRow(
                     label: '公历',
                     value:
@@ -233,10 +222,146 @@ class _InfoRow extends StatelessWidget {
               ),
             ),
           ),
+          Expanded(child: Text(value, style: theme.textTheme.bodyMedium)),
+        ],
+      ),
+    );
+  }
+}
+
+/// 详情页顶部英雄卡：品牌渐变底 + 头像、姓名、关系与下一次生日倒计时。
+class _HeroCard extends StatelessWidget {
+  const _HeroCard({required this.person, required this.occurrence});
+
+  final Person person;
+  final Occurrence occurrence;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isToday = occurrence.isToday;
+    final days = occurrence.daysUntil;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: AppTheme.headerGradient,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            child: PersonAvatar(
+              name: person.name,
+              avatarPath: person.avatarPath,
+              radius: 26,
+            ),
+          ),
+          const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              value,
-              style: theme.textTheme.bodyMedium,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        person.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    if (person.relationship.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          person.relationship,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                if (isToday)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.cake_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '生日快乐',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ],
+                  )
+                else
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        '$days',
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '天后',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.85),
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 2),
+                Text(
+                  '${occurrence.date.month}月${occurrence.date.day}日 · '
+                  '${occurrence.lunar.label}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

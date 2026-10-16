@@ -30,6 +30,22 @@ class LunarInfo {
   /// 例：农历闰六月初一。[monthInChinese] 已含「闰」前缀。
   String get label => '农历$monthInChinese月$dayInChinese';
 
+  /// 属相动物名，如「龙」；按农历年计。
+  String get zodiac => const [
+    '鼠',
+    '牛',
+    '虎',
+    '兔',
+    '龙',
+    '蛇',
+    '马',
+    '羊',
+    '猴',
+    '鸡',
+    '狗',
+    '猪',
+  ][(year - 4) % 12];
+
   @override
   bool operator ==(Object other) =>
       other is LunarInfo &&

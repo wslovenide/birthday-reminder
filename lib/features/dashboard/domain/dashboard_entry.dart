@@ -7,10 +7,17 @@ import '../../settings/domain/age_display.dart';
 
 /// 仪表盘上的一条记录：联系人 + 其下一次生日。
 class DashboardEntry {
-  const DashboardEntry({required this.person, required this.occurrence});
+  const DashboardEntry({
+    required this.person,
+    required this.occurrence,
+    this.zodiac,
+  });
 
   final Person person;
   final Occurrence occurrence;
+
+  /// 属相文案（如「属龙」）；未填写出生年份时为 null。
+  final String? zodiac;
 }
 
 /// 按倒计时升序、同日按姓名排序（今日寿星自然置顶）。
@@ -53,6 +60,16 @@ String? ageLabel(Occurrence occurrence, AgeDisplay display) {
       final xuSui = occurrence.xuSui;
       return xuSui == null ? null : '虚岁 $xuSui';
   }
+}
+
+/// 属相文案，如「属龙」；未填写出生年份时返回 null。
+///
+/// 属相按农历出生年计：先换算出生当天公历日期再转农历，
+/// 公历腊月出生（跨公历年）也能得到正确农历年。
+String? zodiacLabel(BirthdaySpec spec, CalendarEngine engine) {
+  final date = engine.birthDate(spec);
+  if (date == null) return null;
+  return '属${engine.toLunar(date).zodiac}';
 }
 
 /// 仪表盘统计概览。

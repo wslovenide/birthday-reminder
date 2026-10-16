@@ -23,8 +23,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings =
-        ref.watch(settingsProvider).value ?? AppSettings.defaults;
+    final settings = ref.watch(settingsProvider).value ?? AppSettings.defaults;
     final controller = ref.read(settingsControllerProvider);
 
     return Scaffold(
@@ -60,7 +59,9 @@ class SettingsScreen extends ConsumerWidget {
                     } else {
                       next.remove(offset);
                     }
-                    controller.save(settings.copyWith(defaultReminderOffsets: next));
+                    controller.save(
+                      settings.copyWith(defaultReminderOffsets: next),
+                    );
                   },
                 ),
             ],
@@ -92,9 +93,8 @@ class SettingsScreen extends ConsumerWidget {
               ButtonSegment(value: AgeDisplay.xuSui, label: Text('虚岁')),
             ],
             selected: {settings.ageDisplay},
-            onSelectionChanged: (selection) => controller.save(
-              settings.copyWith(ageDisplay: selection.first),
-            ),
+            onSelectionChanged: (selection) =>
+                controller.save(settings.copyWith(ageDisplay: selection.first)),
           ),
           const SizedBox(height: 24),
           const _SectionTitle('主题'),
@@ -105,9 +105,8 @@ class SettingsScreen extends ConsumerWidget {
               ButtonSegment(value: AppThemeMode.dark, label: Text('深色')),
             ],
             selected: {settings.themeMode},
-            onSelectionChanged: (selection) => controller.save(
-              settings.copyWith(themeMode: selection.first),
-            ),
+            onSelectionChanged: (selection) =>
+                controller.save(settings.copyWith(themeMode: selection.first)),
           ),
           const SizedBox(height: 24),
           const _SectionTitle('通知'),
@@ -171,12 +170,14 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
     if (picked == null) return;
-    await ref.read(settingsControllerProvider).save(
-      settings.copyWith(
-        reminderHour: picked.hour,
-        reminderMinute: picked.minute,
-      ),
-    );
+    await ref
+        .read(settingsControllerProvider)
+        .save(
+          settings.copyWith(
+            reminderHour: picked.hour,
+            reminderMinute: picked.minute,
+          ),
+        );
   }
 
   Future<void> _requestPermission(BuildContext context, WidgetRef ref) async {
@@ -185,11 +186,7 @@ class SettingsScreen extends ConsumerWidget {
         .ensurePermission();
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          granted ? '通知权限已授予' : '未获得通知权限，请在系统设置中手动开启',
-        ),
-      ),
+      SnackBar(content: Text(granted ? '通知权限已授予' : '未获得通知权限，请在系统设置中手动开启')),
     );
   }
 
@@ -201,16 +198,12 @@ class SettingsScreen extends ConsumerWidget {
           'birth_remind_backup_${DateTime.now().millisecondsSinceEpoch}.json';
       await ref.read(backupControllerProvider).exportToFile(path);
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(path)],
-          text: '生日提醒备份',
-        ),
+        ShareParams(files: [XFile(path)], text: '生日提醒备份'),
       );
     } catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('导出失败：$error')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('导出失败：$error')));
     }
   }
 
@@ -262,9 +255,8 @@ class SettingsScreen extends ConsumerWidget {
       );
     } on BackupFormatException catch (error) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message)));
     }
   }
 }
@@ -282,6 +274,8 @@ class _SectionTitle extends StatelessWidget {
         title,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
           color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.2,
         ),
       ),
     );
@@ -299,7 +293,7 @@ class _TileCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: child,
     );

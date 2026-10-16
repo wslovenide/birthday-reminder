@@ -28,10 +28,10 @@ class BirthdayCard extends StatelessWidget {
     final age = ageLabel(occurrence, ageDisplay);
 
     return Card(
-      color: isToday ? scheme.primaryContainer : scheme.surfaceContainerLow,
+      color: isToday ? scheme.primaryContainer : null,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -68,10 +68,7 @@ class BirthdayCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    _MetaLine(
-                      person: person,
-                      age: age,
-                    ),
+                    _MetaLine(person: person, age: age, zodiac: entry.zodiac),
                   ],
                 ),
               ),
@@ -90,15 +87,21 @@ class BirthdayCard extends StatelessWidget {
 }
 
 class _MetaLine extends StatelessWidget {
-  const _MetaLine({required this.person, required this.age});
+  const _MetaLine({
+    required this.person,
+    required this.age,
+    required this.zodiac,
+  });
 
   final Person person;
   final String? age;
+  final String? zodiac;
 
   @override
   Widget build(BuildContext context) {
     final parts = <String>[
       if (person.relationship.isNotEmpty) person.relationship,
+      ?zodiac,
       ?age,
     ];
     if (parts.isEmpty) return const SizedBox.shrink();
@@ -117,17 +120,24 @@ class _TodayBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: scheme.primary,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(
-        '今天',
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: scheme.onPrimary,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.cake_rounded, size: 12, color: scheme.onPrimary),
+          const SizedBox(width: 3),
+          Text(
+            '今天',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: scheme.onPrimary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -148,15 +158,18 @@ class _Countdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final label = countdownLabel(daysUntil);
-    final isNear = daysUntil <= 3;
+    final isNear = daysUntil >= 0 && daysUntil <= 7;
 
     return Text(
       label,
-      style: theme.textTheme.titleSmall?.copyWith(
+      style: theme.textTheme.titleMedium?.copyWith(
         color: isToday
             ? scheme.onPrimaryContainer
             : (isNear ? scheme.primary : scheme.onSurfaceVariant),
-        fontWeight: isToday || isNear ? FontWeight.w700 : FontWeight.w500,
+        fontWeight: isToday
+            ? FontWeight.w800
+            : (isNear ? FontWeight.w700 : FontWeight.w600),
+        fontFeatures: const [FontFeature.tabularFigures()],
       ),
     );
   }

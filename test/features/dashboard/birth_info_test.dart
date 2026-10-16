@@ -76,4 +76,59 @@ void main() {
     expect(info.solar, '公历2月29日');
     expect(info.lunar, '填写出生年份后显示');
   });
+
+  group('zodiacLabel', () {
+    test('公历生日按农历出生年取属相', () {
+      // 公历 2000-05-05 属农历庚辰年。
+      final label = zodiacLabel(
+        const BirthdaySpec(
+          type: CalendarType.solar,
+          month: 5,
+          day: 5,
+          birthYear: 2000,
+        ),
+        engine,
+      );
+
+      expect(label, '属龙');
+    });
+
+    test('农历腊月出生按上一个农历年取属相', () {
+      // 农历 1999 腊月十五落在公历 2000 年 1 月，但农历仍是己卯年。
+      final label = zodiacLabel(
+        const BirthdaySpec(
+          type: CalendarType.lunar,
+          month: 12,
+          day: 15,
+          birthYear: 1999,
+        ),
+        engine,
+      );
+
+      expect(label, '属兔');
+    });
+
+    test('农历生日直接取农历年属相', () {
+      final label = zodiacLabel(
+        const BirthdaySpec(
+          type: CalendarType.lunar,
+          month: 6,
+          day: 1,
+          birthYear: 2025,
+        ),
+        engine,
+      );
+
+      expect(label, '属蛇');
+    });
+
+    test('未填写出生年份时无属相', () {
+      final label = zodiacLabel(
+        const BirthdaySpec(type: CalendarType.solar, month: 5, day: 5),
+        engine,
+      );
+
+      expect(label, isNull);
+    });
+  });
 }
